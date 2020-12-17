@@ -65,14 +65,12 @@ type Specification struct {
 		Property            string `envconfig:"inner"`
 		PropertyWithDefault string `default:"fuzzybydefault"`
 	} `envconfig:"outer"`
-	AfterNested         string
-	DecodeStruct        HonorDecodeInStruct `envconfig:"honor"`
-	Datetime            time.Time
-	MapField            map[string]string `default:"one:two,three:four"`
-	UrlValue            CustomURL
-	UrlPointer          *CustomURL
-	RequiredEmptyVar    string `required:"true" `
-	RequiredEmptyAltVar string `required:"true" envconfig:"empty_alt"`
+	AfterNested  string
+	DecodeStruct HonorDecodeInStruct `envconfig:"honor"`
+	Datetime     time.Time
+	MapField     map[string]string `default:"one:two,three:four"`
+	UrlValue     CustomURL
+	UrlPointer   *CustomURL
 }
 
 type Embedded struct {
@@ -398,21 +396,7 @@ func TestRequiredEmptyValue(t *testing.T) {
 	var s Specification
 	os.Clearenv()
 
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foobar")
-	os.Setenv("ENV_CONFIG_REQUIREDEMPTYVAR", "")
-
-	if err := Process("env_config", &s); err == nil {
-		t.Error("no failure when required value is missing", err)
-	}
-}
-
-func TestRequiredEmptyAltValue(t *testing.T) {
-	var s Specification
-	os.Clearenv()
-
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foobar")
-	os.Setenv("ENV_CONFIG_REQUIREDEMPTYVAR", "default")
-	os.Setenv("ENV_CONFIG_EMPTY_ALT", "")
+	os.Setenv("ENV_CONFIG_REQUIREDVAR", "")
 
 	if err := Process("env_config", &s); err == nil {
 		t.Error("no failure when required value is missing", err)
@@ -464,7 +448,7 @@ func TestExplicitBlankDefaultVar(t *testing.T) {
 	var s Specification
 	os.Clearenv()
 	os.Setenv("ENV_CONFIG_DEFAULTVAR", "")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "")
+	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
 
 	if err := Process("env_config", &s); err != nil {
 		t.Error(err.Error())
