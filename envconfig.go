@@ -209,13 +209,13 @@ func Process(prefix string, spec interface{}) error {
 		req := info.Tags.Get("required")
 		if !ok && def == "" {
 			if isTrue(req) {
-				key := info.Key
-				if info.Alt != "" {
-					key = info.Alt
-				}
-				return fmt.Errorf("required key %s missing value", key)
+				return fmt.Errorf("required key %s is missing", info.Key)
 			}
 			continue
+		}
+
+		if value == "" && isTrue(req) {
+			return fmt.Errorf("required key %s is missing value", info.Key)
 		}
 
 		err = processField(value, info.Field)
