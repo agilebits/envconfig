@@ -198,7 +198,10 @@ func Process(prefix string, spec interface{}) error {
 		// here to use os.LookupEnv for >=go1.5
 		value, ok := lookupEnv(info.Key)
 		if !ok && info.Alt != "" {
-			value, ok = lookupEnv(info.Alt)
+			// if the key has not been set in the environment, use the `envconfig`
+			// tag value without the prefix
+			info.Key = info.Alt
+			value, ok = lookupEnv(info.Key)
 		}
 
 		def := info.Tags.Get("default")
@@ -209,13 +212,13 @@ func Process(prefix string, spec interface{}) error {
 		req := info.Tags.Get("required")
 		if !ok && def == "" {
 			if isTrue(req) {
-				key := info.Key
-				if info.Alt != "" {
-					key = info.Alt
-				}
-				return fmt.Errorf("required key %s missing value", key)
+				return fmt.Errorf("required key %s is missing", info.Key)
 			}
 			continue
+		}
+
+		if value == "" && isTrue(req) {
+			return fmt.Errorf("required key %s is missing value", info.Key)
 		}
 
 		err = processField(value, info.Field)
