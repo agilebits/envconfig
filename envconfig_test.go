@@ -392,17 +392,6 @@ func TestRequiredVar(t *testing.T) {
 	}
 }
 
-func TestRequiredEmptyValue(t *testing.T) {
-	var s Specification
-	os.Clearenv()
-
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "")
-
-	if err := Process("env_config", &s); err == nil {
-		t.Error("no failure when required value is missing", err)
-	}
-}
-
 func TestRequiredMissing(t *testing.T) {
 	var s Specification
 	os.Clearenv()
@@ -448,7 +437,7 @@ func TestExplicitBlankDefaultVar(t *testing.T) {
 	var s Specification
 	os.Clearenv()
 	os.Setenv("ENV_CONFIG_DEFAULTVAR", "")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
+	os.Setenv("ENV_CONFIG_REQUIREDVAR", "")
 
 	if err := Process("env_config", &s); err != nil {
 		t.Error(err.Error())
@@ -822,53 +811,9 @@ func TestCheckDisallowedIgnored(t *testing.T) {
 	}
 }
 
-// TestParseErrorKeyForRequiredVar tests that the env var key name is prefix_envconfig-value
-func TestParseErrorKeyForRequiredVar(t *testing.T) {
-	var s struct {
-		Count int `required:"true" envconfig:"ALT_COUNT"`
-	}
-
-	os.Clearenv()
-	os.Setenv("ENV_CONFIG_ALT_COUNT", "name")
-
-	err := Process("env_config", &s)
-	if err == nil {
-		t.Error("no failure for incorrect value of variable")
-	}
-
-	if pErr, ok := err.(*ParseError); ok {
-		if pErr.KeyName != "ENV_CONFIG_ALT_COUNT" {
-			t.Errorf("expected key name ENV_CONFIG_ALT_COUNT but got %s", pErr.KeyName)
-		}
-	}
-
-}
-
-// TestParseErrorKeyForRequiredVar tests that the env var key name is envconfig-value
-func TestParseErrorKeyForRequiredAltVar(t *testing.T) {
-	var s struct {
-		Count int `required:"true" envconfig:"ALT_COUNT"`
-	}
-
-	os.Clearenv()
-	os.Setenv("ALT_COUNT", "name")
-
-	err := Process("env_config", &s)
-	if err == nil {
-		t.Error("no failure for incorrect value of variable")
-	}
-
-	if pErr, ok := err.(*ParseError); ok {
-		if pErr.KeyName != "ALT_COUNT" {
-			t.Errorf("expected key name ALT_COUNT but got %s", pErr.KeyName)
-		}
-	}
-
-}
-
 func TestErrorMessageForRequiredAltVar(t *testing.T) {
 	var s struct {
-		Foo string `envconfig:"BAR" required:"true"`
+		Foo    string `envconfig:"BAR" required:"true"`
 	}
 
 	os.Clearenv()
